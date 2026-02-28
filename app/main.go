@@ -15,6 +15,7 @@ var commands = map[string]string{
 	"echo": "builtin",
 	"type": "builtin",
 	"pwd":  "builtin",
+	"cd":   "builtin",
 }
 
 func main() {
@@ -64,6 +65,21 @@ func main() {
 					fmt.Println(name + ": not found")
 				} else {
 					fmt.Println(name + " is " + path)
+				}
+			}
+			continue
+		} else if strings.HasPrefix(cmd, "cd ") {
+			// basically i check what comes after it and i check if the dir exists
+			// if it exists i go into the dir
+			args := cmd[len("cd "):]
+			_, err := os.Stat(args)
+			if err != nil {
+				fmt.Printf("cd: %s: No such file or directory\n", args)
+			} else {
+				// if the dir exists change curr path to it
+				if err := os.Chdir(args); err != nil {
+					fmt.Fprintf(os.Stderr, "cd: %s: %v\n", args, err)
+					continue
 				}
 			}
 			continue
