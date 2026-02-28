@@ -9,14 +9,12 @@ import (
 	"strings"
 )
 
-// Ensures gofmt doesn't remove the "fmt" import in stage 1 (feel free to remove this!)
-var _ = fmt.Print
-
 // create the slice of strings
 var commands = map[string]string{
 	"exit": "builtin",
 	"echo": "builtin",
 	"type": "builtin",
+	"pwd":  "builtin",
 }
 
 func main() {
@@ -32,12 +30,21 @@ func main() {
 				fmt.Println()
 				return
 			}
-			fmt.Fprintln(os.Stderr, "read error", err)
+			fmt.Fprintf(os.Stderr, "read error %v\n", err)
 			return
 		}
 		// read the input
 		cmd = strings.TrimSpace(cmd)
 		if cmd == "" {
+			continue
+		}
+		if cmd == "pwd" {
+			dir, err := os.Getwd()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "pwd: %v\n", err)
+			} else {
+				fmt.Println(dir)
+			}
 			continue
 		}
 		if cmd == "exit" {
