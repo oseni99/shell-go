@@ -71,14 +71,26 @@ func main() {
 		} else if strings.HasPrefix(cmd, "cd ") {
 			// basically i check what comes after it and i check if the dir exists
 			// if it exists i go into the dir
-			args := cmd[len("cd "):]
-			_, err := os.Stat(args)
-			if err != nil {
-				fmt.Printf("cd: %s: No such file or directory\n", args)
+			args := strings.TrimSpace(cmd[len("cd "):])
+			if args == "~" || args == "" {
+				// get the home directory
+				home, err := os.UserHomeDir()
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "cd: %v\n", err)
+				} else {
+					if err := os.Chdir(home); err != nil {
+						fmt.Fprintf(os.Stderr, "cd: %s: %v\n", args, err)
+					}
+				}
+				continue
 			} else {
-				// if the dir exists change curr path to it
+				// checking the dir
 				if err := os.Chdir(args); err != nil {
-					fmt.Fprintf(os.Stderr, "cd: %s: %v\n", args, err)
+					if os.IsNotExist(err) {
+						fmt.Fprintf(os.Stderr, "cd: %s: No such file or directory\n", args)
+					} else {
+						fmt.Fprintf(os.Stderr, "cd: %s: %v\n", args, err)
+					}
 					continue
 				}
 			}
