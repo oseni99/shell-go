@@ -18,6 +18,38 @@ var commands = map[string]string{
 	"cd":   "builtin",
 }
 
+// this is a where you parse the args
+func parseArgs(line string) []string {
+	var args []string
+	var b strings.Builder
+	inSingle := false
+
+	flush := func() {
+		if b.Len() > 0 {
+			args = append(args, b.String())
+			b.Reset()
+		}
+	}
+
+	// go through all the characters in the input
+	for _, r := range line {
+		switch {
+		case r == '\'':
+			// this toggles in and out of quotes to see if we are inside or not
+			inSingle = !inSingle
+		// i check here if i hit whitespace and we are not in single quotes
+		case (r == ' ' || r == '\t') && !inSingle:
+			flush()
+
+		default:
+			// add the normal character to the token
+			b.WriteRune(r)
+		}
+	}
+	flush()
+	return args
+}
+
 func main() {
 	// read the input
 	reader := bufio.NewReader(os.Stdin)
@@ -106,7 +138,7 @@ func main() {
 			}
 			continue
 		}
-		res := strings.Fields(cmd)
+		res := parseArgs(cmd)
 		if len(res) == 0 {
 			continue
 		}
