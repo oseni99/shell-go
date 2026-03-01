@@ -51,7 +51,17 @@ func main() {
 		if cmd == "exit" {
 			break
 		} else if strings.HasPrefix(cmd, "echo ") {
-			fmt.Println(cmd[len("echo "):])
+			// here i have to deal with the quotes of the strings
+			args := cmd[len("echo "):]
+			// find where there are single quotes and remove it
+			if ok := strings.Contains(args, "'"); ok {
+				args = strings.ReplaceAll(args, "'", "")
+				fmt.Println(args)
+
+			} else {
+				curr := strings.Fields(args)
+				fmt.Println(strings.Join(curr, " "))
+			}
 			continue
 		} else if strings.HasPrefix(cmd, "type ") {
 			// get the first 4 letters after it
