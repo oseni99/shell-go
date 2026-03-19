@@ -23,6 +23,9 @@ func parseArgs(line string) []string {
 	var args []string
 	var b strings.Builder
 	inSingle := false
+	inDouble := false
+
+	// echo "hello    world"
 
 	flush := func() {
 		if b.Len() > 0 {
@@ -34,13 +37,15 @@ func parseArgs(line string) []string {
 	// go through all the characters in the input
 	for _, r := range line {
 		switch {
-		case r == '\'':
+		case r == '\'' && !inDouble:
 			// this toggles in and out of quotes to see if we are inside or not
 			inSingle = !inSingle
+		case r == '"' && !inSingle:
+			// i have to toggle that indouble to signify im inside it
+			inDouble = !inDouble
 		// i check here if i hit whitespace and we are not in single quotes
-		case (r == ' ' || r == '\t') && !inSingle:
+		case (r == ' ' || r == '\t') && !inSingle && !inDouble:
 			flush()
-
 		default:
 			// add the normal character to the token
 			b.WriteRune(r)
@@ -86,14 +91,9 @@ func main() {
 			// here i have to deal with the quotes of the strings
 			args := cmd[len("echo "):]
 			// find where there are single quotes and remove it
-			if ok := strings.Contains(args, "'"); ok {
-				args = strings.ReplaceAll(args, "'", "")
-				fmt.Println(args)
-
-			} else {
-				curr := strings.Fields(args)
-				fmt.Println(strings.Join(curr, " "))
-			}
+			// here i use the parse args method now
+			parsed := parseArgs(args)
+			fmt.Println(strings.Join(parsed, " "))
 			continue
 		} else if strings.HasPrefix(cmd, "type ") {
 			// get the first 4 letters after it
